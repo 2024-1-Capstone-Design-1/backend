@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 
 import logger from "./utils/logger.js";
-import { initDatabase } from "./db/init.js";
+import { initDatabase } from "./configs/db.js";
 
 const app = express();
 const port = 3000;
