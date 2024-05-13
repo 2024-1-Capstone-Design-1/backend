@@ -19,22 +19,26 @@ async function createUserTable(client) {
         END $$;
                 
         CREATE TABLE IF NOT EXISTS "users" (
-            "id" SERIAL PRIMARY KEY NOT NULL,
-            "nickname" varchar UNIQUE NOT NULL,
-            "image_url" varchar,
-            "email" varchar UNIQUE NOT NULL,
-            "password" varchar NOT NULL,
-            "role" role DEFAULT 'general' NOT NULL,
-            "deleted" boolean DEFAULT false NOT NULL,
-            "created_at" timestamp NOT NULL,
-            "deleted_at" timestamp
-        );`;
+          "id" SERIAL PRIMARY KEY,
+          "email" varchar UNIQUE NOT NULL,
+          "username" varchar,
+          "nickname" varchar UNIQUE NOT NULL,
+          "profile_image" varchar,
+          "subdomain" varchar UNIQUE,
+          "role" role DEFAULT 'general' NOT NULL,
+          "deleted" boolean DEFAULT false NOT NULL,
+          "created_at" timestamp,
+          "deleted_at" timestamp
+        );
+      `;
 
     await client.query(query);
 
     logger.info("User table created successfully");
   } catch (err) {
     logger.error("Error creating user table:", err);
+
+    throw err;
   }
 }
 
