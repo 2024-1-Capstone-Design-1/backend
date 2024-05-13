@@ -6,6 +6,7 @@ import createUserTable from "../models/user.js";
 import createBoardTable from "../models/board.js";
 import createTemplateTable from "../models/template.js";
 import alterTablesToAddForeignKeys from "../models/alterTable.js";
+import createBlogTable from "../models/blog.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ async function initDatabase() {
     await client.query("BEGIN");
 
     await createUserTable(client);
+    await createBlogTable(client);
     await createBoardTable(client);
     await createTemplateTable(client);
     await alterTablesToAddForeignKeys(client);
