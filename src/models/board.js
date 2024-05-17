@@ -8,7 +8,7 @@ async function createBoardTable(client) {
         "title" varchar NOT NULL,
         "detail" varchar NOT NULL,
         "deleted" boolean DEFAULT false,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL
       );
@@ -23,7 +23,7 @@ async function createBoardTable(client) {
         "id" SERIAL PRIMARY KEY,
         "comment" varchar NOT NULL,
         "deleted" boolean DEFAULT false,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL,
         "board_id" INTEGER NOT NULL
@@ -33,7 +33,7 @@ async function createBoardTable(client) {
         "id" SERIAL PRIMARY KEY,
         "comment" varchar NOT NULL,
         "deleted" boolean DEFAULT false,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL,
         "board_comment_id" INTEGER NOT NULL
@@ -48,9 +48,9 @@ async function createBoardTable(client) {
 
     await client.query(query);
 
-    logger.info("Board table created successfully");
+    logger.info(`Board table created successfully`);
   } catch (err) {
-    logger.error("Error creating board table:", err);
+    logger.error(`Error creating board table: ${err.message}`);
 
     throw err;
   }

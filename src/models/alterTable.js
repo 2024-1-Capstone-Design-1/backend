@@ -25,9 +25,9 @@ async function alterTablesToAddForeignKeys(client) {
 
     await client.query(query);
 
-    logger.info("Foreign keys added successfully");
+    logger.info(`Foreign keys added successfully`);
   } catch (err) {
-    logger.error("Error adding foreign keys:", err);
+    logger.error(`Error adding foreign keys: ${err.message}`);
 
     throw err;
   }

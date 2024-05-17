@@ -7,15 +7,15 @@ async function createBlogTable(client) {
             "id" SERIAL PRIMARY KEY,
             "user_id" INTEGER NOT NULL,
             "template_id" INTEGER NOT NULL,
-            "created_at" timestamp
+            "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
         );
   `;
 
     await client.query(query);
 
-    logger.info("blog table created successfully");
+    logger.info(`Blog table created successfully`);
   } catch (err) {
-    logger.error("Error creating blog table:", err);
+    logger.error(`Error creating blog table: ${err.messasge}`);
 
     throw err;
   }

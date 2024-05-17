@@ -21,22 +21,23 @@ async function createUserTable(client) {
         CREATE TABLE IF NOT EXISTS "users" (
           "id" SERIAL PRIMARY KEY,
           "email" varchar UNIQUE NOT NULL,
-          "username" varchar,
+          "password" varchar NOT NULL,
+          "username" varchar NOT NULL,
           "nickname" varchar UNIQUE NOT NULL,
           "profile_image" varchar,
           "subdomain" varchar UNIQUE,
           "role" role DEFAULT 'general' NOT NULL,
           "deleted" boolean DEFAULT false NOT NULL,
-          "created_at" timestamp,
+          "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
           "deleted_at" timestamp
         );
       `;
 
     await client.query(query);
 
-    logger.info("User table created successfully");
+    logger.info(`User table created successfully`);
   } catch (err) {
-    logger.error("Error creating user table:", err);
+    logger.error(`Error creating user table: ${err.message}`);
 
     throw err;
   }

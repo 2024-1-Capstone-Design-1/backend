@@ -16,7 +16,7 @@ const customFormat = winston.format.combine(
 );
 
 const logger = winston.createLogger({
-  level: "info",
+  level: "debug",
   format: customFormat,
   transports: [
     new winston.transports.Console(),
