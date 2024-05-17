@@ -37,7 +37,7 @@ async function initDatabase() {
   } catch (err) {
     await client.query("ROLLBACK");
 
-    logger.error("Error initializing database:", err);
+    logger.error(`Error initializing database: ${err.message}`);
   } finally {
     client.release();
   }

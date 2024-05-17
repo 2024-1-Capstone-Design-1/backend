@@ -10,7 +10,7 @@ async function createTemplateTable(client) {
         "code" json,
         "share" boolean DEFAULT false NOT NULL,
         "deleted" boolean DEFAULT false NOT NULL,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL
       );
@@ -25,7 +25,7 @@ async function createTemplateTable(client) {
         "id" SERIAL PRIMARY KEY,
         "comment" varchar NOT NULL,
         "deleted" boolean DEFAULT false,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL,
         "template_id" INTEGER NOT NULL
@@ -35,7 +35,7 @@ async function createTemplateTable(client) {
         "id" SERIAL PRIMARY KEY,
         "comment" varchar NOT NULL,
         "deleted" boolean DEFAULT false,
-        "created_at" timestamp,
+        "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
         "user_id" INTEGER NOT NULL,
         "template_comment_id" INTEGER NOT NULL
@@ -50,9 +50,9 @@ async function createTemplateTable(client) {
 
     await client.query(query);
 
-    logger.info("Template table created successfully");
+    logger.info(`Template table created successfully`);
   } catch (err) {
-    logger.error("Error creating template table:", err);
+    logger.error(`Error creating template table: ${err.message}`);
 
     throw err;
   }
