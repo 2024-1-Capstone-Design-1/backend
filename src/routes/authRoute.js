@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { signup } from "../controllers/authController.js";
+import { signup, login } from "../controllers/authController.js";
 import {
   attachDbClient,
   releaseDbClient,
@@ -9,6 +9,6 @@ import {
 const authRouter = Router();
 
 authRouter.post("/signup", attachDbClient, signup, releaseDbClient);
-authRouter.post("/login");
+authRouter.post("/login", attachDbClient, login, releaseDbClient);
 
 export default authRouter;
