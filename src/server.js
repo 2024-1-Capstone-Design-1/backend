@@ -5,6 +5,8 @@ import bodyParser from "body-parser";
 import logger from "./utils/logger.js";
 import { initDatabase } from "./configs/db.js";
 import authRouter from "./routes/authRoute.js";
+import blogRouter from "./routes/blogRoute.js";
+import templateRouter from "./routes/templateRoute.js";
 
 const app = express();
 const port = 3000;
@@ -15,12 +17,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use("/auth", authRouter);
-
-await initDatabase();
+app.use("/blog", blogRouter);
+app.use("/template", templateRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+await initDatabase();
 
 app.listen(port, () => {
   logger.info(`App listening on http://localhost:${port}`);
