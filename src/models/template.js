@@ -7,7 +7,7 @@ async function createTemplateTable(client) {
         "id" SERIAL PRIMARY KEY,
         "name" varchar NOT NULL,
         "thumbnail" varchar NOT NULL,
-        "code" json,
+        "code" jsonb NOT NULL,
         "share" boolean DEFAULT false NOT NULL,
         "deleted" boolean DEFAULT false NOT NULL,
         "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,

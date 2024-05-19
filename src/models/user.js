@@ -25,7 +25,6 @@ async function createUserTable(client) {
           "username" varchar NOT NULL,
           "nickname" varchar UNIQUE NOT NULL,
           "profile_image" varchar,
-          "subdomain" varchar UNIQUE,
           "role" role DEFAULT 'general' NOT NULL,
           "deleted" boolean DEFAULT false NOT NULL,
           "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,

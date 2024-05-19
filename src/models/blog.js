@@ -3,12 +3,16 @@ import logger from "../utils/logger.js";
 async function createBlogTable(client) {
   try {
     const query = `
-        CREATE TABLE IF NOT EXISTS "blogs" (
-            "id" SERIAL PRIMARY KEY,
-            "user_id" INTEGER NOT NULL,
-            "template_id" INTEGER NOT NULL,
-            "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL
-        );
+      CREATE TABLE IF NOT EXISTS "blogs" (
+          "id" SERIAL PRIMARY KEY,
+          "name" varchar NOT NULL,
+          "subdomain" varchar NOT NULL UNIQUE,
+          "user_id" INTEGER NOT NULL,
+          "template_id" INTEGER NOT NULL,
+          "deleted" boolean DEFAULT false NOT NULL,
+          "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+          "deleted_at" timestamp
+      );
   `;
 
     await client.query(query);

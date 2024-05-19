@@ -3,15 +3,14 @@ import { createUser, loginService } from "../services/authService.js";
 
 async function signup(req, res) {
   try {
-    const userData = req.body;
     const dbClient = req.dbClient;
+    const userData = req.body;
     const missingFields = [];
 
     if (!userData.email) missingFields.push("email");
     if (!userData.password) missingFields.push("password");
     if (!userData.username) missingFields.push("username");
     if (!userData.nickname) missingFields.push("nickname");
-    if (!userData.subDomain) missingFields.push("subDomain");
 
     if (missingFields.length > 0) {
       logger.debug(

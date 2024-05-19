@@ -5,9 +5,9 @@ async function attachDbClient(req, res, next) {
   try {
     req.dbClient = await pool.connect();
 
-    next();
+    return next();
   } catch (err) {
-    logger.debug("attachDbClient(middleware): Error acquiring client", err);
+    logger.debug(`attachDbClient(middleware): ${err.message}`);
 
     return res.status(500).send("Internal Server Error");
   }
@@ -18,7 +18,7 @@ async function releaseDbClient(req, res, next) {
     req.dbClient.release();
   }
 
-  next();
+  return next();
 }
 
 export { attachDbClient, releaseDbClient };
