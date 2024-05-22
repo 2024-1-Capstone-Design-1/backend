@@ -10,7 +10,8 @@ async function createBoardTable(client) {
         "deleted" boolean DEFAULT false,
         "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
         "deleted_at" timestamp,
-        "user_id" INTEGER NOT NULL
+        "user_id" INTEGER NOT NULL,
+        "blog_id" INTEGER NOT NULL
       );
       
       CREATE TABLE IF NOT EXISTS "board_images" (

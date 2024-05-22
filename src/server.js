@@ -9,6 +9,7 @@ import { initDatabase } from "./configs/db.js";
 import authRouter from "./routes/authRoute.js";
 import blogRouter from "./routes/blogRoute.js";
 import templateRouter from "./routes/templateRoute.js";
+import boardRouter from "./routes/boardRoute.js";
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/auth", authRouter);
 app.use("/blog", blogRouter);
 app.use("/template", templateRouter);
+app.use("/board", boardRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
