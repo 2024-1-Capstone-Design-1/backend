@@ -32,7 +32,7 @@ async function create(req, res) {
         `create(blogController): User data mismatch - token user(${user.id}, ${user.email}, ${user.role}) and db user(${existingUser.id}, ${existingUser.email}, ${existingUser.role})`
       );
 
-      return res.status(403).json({ message: "Forbidden: User data mismatch" });
+      return res.status(403).json({ message: "User data mismatch" });
     }
 
     const blogData = req.body;
