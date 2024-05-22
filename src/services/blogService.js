@@ -13,7 +13,7 @@ async function createBlog(blogData, user, dbClient) {
 
     if (existingSubDomain.rows.length > 0) {
       logger.debug(
-        `createBlog(BlogService): Subdomain(${subDomain}) already in use`
+        `createBlog(blogService): Subdomain(${subDomain}) already in use`
       );
 
       throw new AppError(400, `Subdomain already in use`);
@@ -26,7 +26,7 @@ async function createBlog(blogData, user, dbClient) {
 
     if (existingTemplateId.rows.length == 0) {
       logger.debug(
-        `createBlog(BlogService): Template(${templateId}) does not exists`
+        `createBlog(blogService): Template(${templateId}) does not exists`
       );
 
       throw new AppError(404, `Template does not exists`);
@@ -46,12 +46,12 @@ async function createBlog(blogData, user, dbClient) {
     }
 
     logger.debug(
-      `createBlog(BlogService): New blog created with blogId(${blogId})`
+      `createBlog(blogService): New blog created with blogId(${blogId})`
     );
 
     return new AppResponse(201, `Blog created successfully`);
   } catch (err) {
-    logger.error(`createBlog(BlogService): ${err.message}`);
+    logger.error(`createBlog(blogService): ${err.message}`);
 
     if (err.status !== 500) {
       throw err;
