@@ -5,7 +5,7 @@ import {
   releaseDbClient,
 } from "../middlewares/dbMiddleware.js";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import { create, get } from "../controllers/blogController.js";
+import { create, get, update } from "../controllers/blogController.js";
 
 const blogRouter = Router();
 
@@ -195,6 +195,108 @@ blogRouter.get(
   authenticateToken,
   attachDbClient,
   get,
+  releaseDbClient
+);
+
+/**
+ * @swagger
+ * /blog/{subDomain}/update:
+ *   patch:
+ *     summary: Update a blog
+ *     description: Update blog details for the authenticated user.
+ *     tags:
+ *       - Blogs
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The name of the blog
+ *                 example: "Updated Blog Name"
+ *               template_id:
+ *                 type: integer
+ *                 description: The ID of the template to use
+ *                 example: 2
+ *     responses:
+ *       200:
+ *         description: Blog updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog updated successfully
+ *       400:
+ *         description: Missing required fields or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Missing required fields or invalid input
+ *       401:
+ *         description: Unauthorized access attempt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized access attempt
+ *       403:
+ *         description: User data mismatch or unauthorized update attempt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User data mismatch or unauthorized update attempt
+ *       404:
+ *         description: User or template does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User or template does not exist
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+blogRouter.patch(
+  "/:subDomain/update",
+  authenticateToken,
+  attachDbClient,
+  update,
   releaseDbClient
 );
 
