@@ -16,7 +16,7 @@ async function createBoard(boardData, user, dbClient) {
     const userId = user.id;
 
     const existingBlog = await dbClient.query(
-      `SELECT id FROM blogs WHERE user_id = $1`,
+      `SELECT id FROM blogs WHERE id = $1 and user_id = $2`,
       [userId]
     );
 
@@ -82,4 +82,54 @@ async function createBoard(boardData, user, dbClient) {
   }
 }
 
-export { createBoard };
+async function getAllBoards(subDomain, dbClient) {
+  try {
+    const existingBlog = await dbClient.query(
+      `SELECT id FROM blogs WHERE subdomain = $1`,
+      [subDomain]
+    );
+
+    if (existingBlog.rows.length < 1) {
+      logger.debug(`getAllBoard(boardService): Blog does not exists`);
+
+      throw new AppError(400, `Blog does not exists`);
+    }
+
+    const blogId = existingBlog.rows[0].id;
+
+    const boardsResult = await dbClient.query(
+      `SELECT b.id, b.title, b.detail, b_i.image FROM boards b INNER JOIN board_images b_i ON b.id = b_i.board_id WHERE blog_id = $1`,
+      [blogId]
+    );
+
+    const boardsMap = new Map();
+
+    boardsResult.rows.forEach((row) => {
+      if (!boardsMap.has(row.id)) {
+        boardsMap.set(row.id, {
+          id: row.id,
+          title: row.title,
+          detail: row.detail,
+          images: [],
+        });
+      }
+      boardsMap.get(row.id).images.push(row.image);
+    });
+
+    const result = Array.from(boardsMap.values());
+
+    logger.debug(`getAllBoard(boardService): All board data got successfully`);
+
+    return new AppResponse(200, `All board data got successfully`, result);
+  } catch (err) {
+    logger.error(`getAllBoard(boardService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export { createBoard, getAllBoards };

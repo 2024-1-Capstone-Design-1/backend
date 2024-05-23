@@ -1,5 +1,6 @@
 import { Router } from "express";
 
+import boardRouter from "./boardRoute.js";
 import {
   attachDbClient,
   releaseDbClient,
@@ -8,6 +9,15 @@ import authenticateToken from "../middlewares/authMiddleware.js";
 import { create, get, update } from "../controllers/blogController.js";
 
 const blogRouter = Router();
+
+blogRouter.use(
+  "/:subDomain/board",
+  (req, res, next) => {
+    req.subDomain = req.params.subDomain;
+    next();
+  },
+  boardRouter
+);
 
 /**
  * @swagger
