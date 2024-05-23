@@ -62,9 +62,7 @@ async function verifyToken(token) {
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET);
 
-    logger.debug(
-      `verifyToken(jwtUtil): Token verified for userId(${user.id})}`
-    );
+    logger.debug(`verifyToken(jwtUtil): Token verified for userId(${user.id})`);
 
     return user;
   } catch (err) {
