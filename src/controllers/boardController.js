@@ -1,6 +1,6 @@
 import logger from "../utils/logger.js";
 import { getUserById } from "../services/userService.js";
-import { createBoard } from "../services/boardService.js";
+import { createBoard, getAllBoards } from "../services/boardService.js";
 
 async function create(req, res) {
   try {
@@ -35,6 +35,14 @@ async function create(req, res) {
       return res.status(403).json({ message: "User data mismatch" });
     }
 
+    const { subDomain } = req.params;
+
+    if (!subDomain) {
+      logger.debug(`create(boardController): No subDomain found in request`);
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
     const boardData = req.body;
     const missingFields = [];
 
@@ -65,4 +73,31 @@ async function create(req, res) {
   }
 }
 
-export { create };
+async function getAll(req, res) {
+  try {
+    const dbClient = req.dbClient;
+    const subDomain = req.subDomain;
+
+    if (!subDomain) {
+      logger.debug(`getAll(boardController): No subDomain found in request`);
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
+    const result = await getAllBoards(subDomain, dbClient);
+
+    return res
+      .status(result.status)
+      .json({ message: result.message, data: result.data });
+  } catch (err) {
+    logger.error(`getAll(boardController): ${err.message}`);
+
+    if (err.status == 500) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    return res.status(err.status).json({ message: err.message });
+  }
+}
+
+export { create, getAll };
