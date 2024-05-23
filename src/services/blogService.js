@@ -61,4 +61,57 @@ async function createBlog(blogData, user, dbClient) {
   }
 }
 
-export { createBlog };
+async function getBlog(subDomain, dbClient) {
+  try {
+    const existingSubDomain = await dbClient.query(
+      `SELECT id, name, subdomain, template_id FROM blogs WHERE subdomain = $1`,
+      [subDomain]
+    );
+
+    if (existingSubDomain.rows.length == 0) {
+      logger.debug(`getBlog(blogService): SubDomain does not exists`);
+
+      throw new AppError(404, `SubDomain does not exists`);
+    }
+
+    const templateId = existingSubDomain.rows[0].template_id;
+
+    if (!templateId) {
+      logger.debug(`getBlog(blogService): TemplateId does not exists`);
+
+      throw new AppError(500, `Internal Server Error`);
+    }
+
+    const existingTemplate = await dbClient.query(
+      `SELECT id, code FROM templates WHERE id = $1`,
+      [templateId]
+    );
+
+    if (existingTemplate.rows.length == 0) {
+      logger.debug(`getBlog(blogService): Template does not exists`);
+
+      throw new AppError(500, `Internal Server Error`);
+    }
+
+    const result = {
+      id: existingSubDomain.rows[0].id,
+      name: existingSubDomain.rows[0].name,
+      subDomain: existingSubDomain.rows[0].subdomain,
+      template: existingTemplate.rows[0],
+    };
+
+    logger.debug(`getBlog(blogService): Blog data retrieved successfully`);
+
+    return new AppResponse(200, `Blog data retrieved successfully`, result);
+  } catch (err) {
+    logger.error(`getBlog(blogService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export { createBlog, getBlog };
