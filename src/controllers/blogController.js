@@ -1,6 +1,6 @@
 import logger from "../utils/logger.js";
 import { getUserById } from "../services/userService.js";
-import { createBlog } from "../services/blogService.js";
+import { createBlog, getBlog } from "../services/blogService.js";
 
 async function create(req, res) {
   try {
@@ -66,4 +66,32 @@ async function create(req, res) {
   }
 }
 
-export { create };
+async function get(req, res) {
+  try {
+    const { subDomain } = req.params;
+
+    if (!subDomain) {
+      logger.debug(`get(blogController): No subDomain found in request`);
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
+    const dbClient = req.dbClient;
+
+    const result = await getBlog(subDomain, dbClient);
+
+    return res
+      .status(result.status)
+      .json({ message: result.message, data: result.data });
+  } catch (err) {
+    logger.error(`get(blogController): ${err.message}`);
+
+    if (err.status == 500) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    return res.status(err.status).json({ message: err.message });
+  }
+}
+
+export { create, get };

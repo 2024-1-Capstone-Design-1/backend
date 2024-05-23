@@ -5,7 +5,7 @@ import {
   releaseDbClient,
 } from "../middlewares/dbMiddleware.js";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import { create } from "../controllers/blogController.js";
+import { create, get } from "../controllers/blogController.js";
 
 const blogRouter = Router();
 
@@ -109,6 +109,92 @@ blogRouter.post(
   authenticateToken,
   attachDbClient,
   create,
+  releaseDbClient
+);
+
+/**
+ * @swagger
+ * /blog/{subDomain}:
+ *   get:
+ *     summary: Get blog by subDomain
+ *     description: Retrieve blog details using the subDomain.
+ *     tags:
+ *       - Blogs
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog to retrieve
+ *     responses:
+ *       200:
+ *         description: Blog data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog data retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: My Blog
+ *                     subDomain:
+ *                       type: string
+ *                       example: myblog
+ *                     template:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: integer
+ *                           example: 1
+ *                         code:
+ *                           type: string
+ *                           example: "TEMPLATE123"
+ *       400:
+ *         description: SubDomain is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain is required
+ *       404:
+ *         description: SubDomain does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain does not exist
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+blogRouter.get(
+  "/:subDomain",
+  authenticateToken,
+  attachDbClient,
+  get,
   releaseDbClient
 );
 
