@@ -5,7 +5,12 @@ import {
   releaseDbClient,
 } from "../middlewares/dbMiddleware.js";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import { create, getAll, getOne } from "../controllers/boardController.js";
+import {
+  create,
+  getAll,
+  getOne,
+  update,
+} from "../controllers/boardController.js";
 
 const boardRouter = Router();
 
@@ -290,6 +295,107 @@ boardRouter.get(
   authenticateToken,
   attachDbClient,
   getOne,
+  releaseDbClient
+);
+
+/**
+ * @swagger
+ * /blog/{subDomain}/board/update/{id}:
+ *   patch:
+ *     summary: Update a specific board by ID
+ *     description: Update a specific board by its ID and the blog's subDomain.
+ *     tags:
+ *       - Boards
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the board to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: The title of the board
+ *                 example: "Updated Board Title"
+ *               detail:
+ *                 type: string
+ *                 description: The detail of the board
+ *                 example: "Updated Board Detail"
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   example: "http://example.com/image.jpg"
+ *     responses:
+ *       200:
+ *         description: Board updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Board updated successfully
+ *       400:
+ *         description: SubDomain or Board ID is required or Missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain or Board ID is required or Missing required fields
+ *       403:
+ *         description: Unauthorized update attempt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized update attempt
+ *       404:
+ *         description: Blog or Board not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog or Board not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+boardRouter.patch(
+  "/update/:id",
+  authenticateToken,
+  attachDbClient,
+  update,
   releaseDbClient
 );
 
