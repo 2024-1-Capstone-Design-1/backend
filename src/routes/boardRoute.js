@@ -5,7 +5,7 @@ import {
   releaseDbClient,
 } from "../middlewares/dbMiddleware.js";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import { create, getAll } from "../controllers/boardController.js";
+import { create, getAll, getOne } from "../controllers/boardController.js";
 
 const boardRouter = Router();
 
@@ -138,7 +138,7 @@ boardRouter.post(
  *               properties:
  *                 message:
  *                   type: string
- *                   example: All board data got successfully
+ *                   example: All board data retrieved successfully
  *                 data:
  *                   type: array
  *                   items:
@@ -153,6 +153,10 @@ boardRouter.post(
  *                       detail:
  *                         type: string
  *                         example: Board Detail
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2022-03-27T14:30:00Z"
  *                       images:
  *                         type: array
  *                         items:
@@ -168,6 +172,16 @@ boardRouter.post(
  *                 message:
  *                   type: string
  *                   example: SubDomain is required or Blog does not exist
+ *       404:
+ *         description: Blog not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog not found
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -184,6 +198,98 @@ boardRouter.get(
   authenticateToken,
   attachDbClient,
   getAll,
+  releaseDbClient
+);
+
+/**
+ * @swagger
+ * /blog/{subDomain}/board/get-one/{id}:
+ *   get:
+ *     summary: Get a specific board by ID
+ *     description: Retrieve a specific board by its ID and the blog's subDomain.
+ *     tags:
+ *       - Boards
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the board to retrieve
+ *     responses:
+ *       200:
+ *         description: Board data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Board data retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     title:
+ *                       type: string
+ *                       example: Board Title
+ *                     detail:
+ *                       type: string
+ *                       example: Board Detail
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2022-03-27T14:30:00Z"
+ *                     images:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                         example: http://example.com/image.jpg
+ *       400:
+ *         description: SubDomain or Board ID is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain or Board ID is required
+ *       404:
+ *         description: Blog or Board not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog or Board not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+boardRouter.get(
+  "/get-one/:id",
+  authenticateToken,
+  attachDbClient,
+  getOne,
   releaseDbClient
 );
 
