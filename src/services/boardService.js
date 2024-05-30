@@ -89,40 +89,43 @@ async function getAllBoards(subDomain, dbClient) {
       [subDomain]
     );
 
-    if (existingBlog.rows.length < 1) {
-      logger.debug(`getAllBoard(boardService): Blog does not exists`);
+    if (existingBlog.rows.length === 0) {
+      logger.debug(
+        `getAllBoards(boardService): Blog not found for subdomain(${subDomain})`
+      );
 
-      throw new AppError(400, `Blog does not exists`);
+      throw new AppError(404, "Blog not found");
     }
 
     const blogId = existingBlog.rows[0].id;
 
     const boardsResult = await dbClient.query(
-      `SELECT b.id, b.title, b.detail, b_i.image FROM boards b INNER JOIN board_images b_i ON b.id = b_i.board_id WHERE blog_id = $1`,
+      `
+      SELECT b.id, b.title, b.detail, b.created_at,
+      COALESCE(JSON_AGG(b_i.image) FILTER (WHERE b_i.image IS NOT NULL), '[]') AS images 
+      FROM boards b 
+      LEFT JOIN board_images b_i 
+      ON b.id = b_i.board_id 
+      WHERE b.blog_id = $1 
+      GROUP BY b.id
+      ORDER BY b.created_at DESC;
+      `,
       [blogId]
     );
 
-    const boardsMap = new Map();
+    const result = boardsResult.rows;
 
-    boardsResult.rows.forEach((row) => {
-      if (!boardsMap.has(row.id)) {
-        boardsMap.set(row.id, {
-          id: row.id,
-          title: row.title,
-          detail: row.detail,
-          images: [],
-        });
-      }
-      boardsMap.get(row.id).images.push(row.image);
-    });
+    logger.debug(
+      `getAllBoards(boardService): All board data retrieved successfully`
+    );
 
-    const result = Array.from(boardsMap.values());
-
-    logger.debug(`getAllBoard(boardService): All board data got successfully`);
-
-    return new AppResponse(200, `All board data got successfully`, result);
+    return new AppResponse(
+      200,
+      `All board data retrieved successfully`,
+      result
+    );
   } catch (err) {
-    logger.error(`getAllBoard(boardService): ${err.message}`);
+    logger.error(`getAllBoards(boardService): ${err.message}`);
 
     if (err.status !== 500) {
       throw err;
@@ -132,4 +135,59 @@ async function getAllBoards(subDomain, dbClient) {
   }
 }
 
-export { createBoard, getAllBoards };
+async function getOneBoard(subDomain, boardId, dbClient) {
+  try {
+    const existingBlog = await dbClient.query(
+      `SELECT id FROM blogs WHERE subdomain = $1`,
+      [subDomain]
+    );
+
+    if (existingBlog.rows.length === 0) {
+      logger.debug(
+        `getOneBoard(boardService): Blog not found for subdomain(${subDomain})`
+      );
+
+      throw new AppError(404, "Blog not found");
+    }
+
+    const blogId = existingBlog.rows[0].id;
+
+    const boardResult = await dbClient.query(
+      `
+      SELECT b.id, b.title, b.detail, b.created_at,
+      COALESCE(JSON_AGG(b_i.image) FILTER (WHERE b_i.image IS NOT NULL), '[]') AS images 
+      FROM boards b 
+      LEFT JOIN board_images b_i 
+      ON b.id = b_i.board_id 
+      WHERE b.blog_id = $1 AND b.id = $2 
+      GROUP BY b.id;
+      `,
+      [blogId, boardId]
+    );
+
+    if (boardResult.rows.length === 0) {
+      logger.debug(
+        `getOneBoard(boardService): Board not found for id(${boardId})`
+      );
+      throw new AppError(404, "Board not found");
+    }
+
+    const result = boardResult.rows[0];
+
+    logger.debug(
+      `getOneBoard(boardService): Board data retrieved successfully`
+    );
+
+    return new AppResponse(200, `Board data retrieved successfully`, result);
+  } catch (err) {
+    logger.error(`getOneBoard(boardService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export { createBoard, getAllBoards, getOneBoard };

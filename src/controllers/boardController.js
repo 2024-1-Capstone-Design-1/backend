@@ -1,6 +1,10 @@
 import logger from "../utils/logger.js";
 import { getUserById } from "../services/userService.js";
-import { createBoard, getAllBoards } from "../services/boardService.js";
+import {
+  createBoard,
+  getAllBoards,
+  getOneBoard,
+} from "../services/boardService.js";
 
 async function create(req, res) {
   try {
@@ -100,4 +104,38 @@ async function getAll(req, res) {
   }
 }
 
-export { create, getAll };
+async function getOne(req, res) {
+  try {
+    const dbClient = req.dbClient;
+    const subDomain = req.subDomain;
+    const boardId = req.params.id;
+
+    if (!subDomain) {
+      logger.debug(`getOne(boardController): No subDomain found in request`);
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
+    if (!boardId) {
+      logger.debug(`getOne(boardController): No boardId found in request`);
+
+      return res.status(400).json({ message: "Board ID is required" });
+    }
+
+    const result = await getOneBoard(subDomain, boardId, dbClient);
+
+    return res
+      .status(result.status)
+      .json({ message: result.message, data: result.data });
+  } catch (err) {
+    logger.error(`getOne(boardController): ${err.message}`);
+
+    if (err.status == 500) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    return res.status(err.status).json({ message: err.message });
+  }
+}
+
+export { create, getAll, getOne };
