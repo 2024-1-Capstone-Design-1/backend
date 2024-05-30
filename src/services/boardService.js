@@ -190,4 +190,98 @@ async function getOneBoard(subDomain, boardId, dbClient) {
   }
 }
 
-export { createBoard, getAllBoards, getOneBoard };
+async function updateBoard(
+  subDomain,
+  boardUpdateData,
+  boardId,
+  userId,
+  dbClient
+) {
+  try {
+    const existingSubDomain = await dbClient.query(
+      `SELECT id, user_id FROM blogs WHERE subdomain = $1`,
+      [subDomain]
+    );
+
+    if (existingSubDomain.rows.length == 0) {
+      logger.debug(`updateBoard(boardService): SubDomain does not exists`);
+
+      throw new AppError(404, `SubDomain does not exists`);
+    }
+
+    if (userId !== existingSubDomain.rows[0].user_id) {
+      logger.debug(
+        `updateBoard(boardService): Unauthorized update attempt by user(${userId}) for blog(${subDomain})`
+      );
+
+      throw new AppError(403, `Unauthorized`);
+    }
+
+    const blogId = existingSubDomain.rows[0].id;
+    const { title, detail, images } = boardUpdateData;
+
+    if (!title && !detail && !images) {
+      logger.debug(
+        `updateBoard(boardService): No update fields provided for board update`
+      );
+
+      throw new AppError(400, "No update fields provided");
+    }
+
+    const updateFields = [];
+    const updateValues = [];
+
+    let query = "UPDATE boards SET ";
+
+    if (title) {
+      updateFields.push("title = $" + (updateValues.length + 1));
+      updateValues.push(title);
+    }
+
+    if (detail) {
+      updateFields.push("detail = $" + (updateValues.length + 1));
+      updateValues.push(detail);
+    }
+
+    if (updateFields.length > 0) {
+      query +=
+        updateFields.join(", ") +
+        ` WHERE id = $${updateValues.length + 1} AND blog_id = $${
+          updateValues.length + 2
+        }`;
+      updateValues.push(boardId);
+      updateValues.push(blogId);
+
+      await dbClient.query(query, updateValues);
+    }
+
+    if (images.length > 0) {
+      await dbClient.query("DELETE FROM board_images WHERE board_id = $1", [
+        boardId,
+      ]);
+
+      for (let i = 0; i < images.length; i++) {
+        await dbClient.query(
+          "INSERT INTO board_images (image, board_id) VALUES ($1, $2)",
+          [images[i], boardId]
+        );
+      }
+    }
+
+    logger.debug(
+      `updateBoard(boardService): Board with id(${boardId}) updated successfully`
+    );
+
+    return new AppResponse(200, `Board updated successfully`);
+  } catch (err) {
+    logger.error(`updateBoard(boardService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export { createBoard, getAllBoards, getOneBoard, updateBoard };

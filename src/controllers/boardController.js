@@ -4,6 +4,7 @@ import {
   createBoard,
   getAllBoards,
   getOneBoard,
+  updateBoard,
 } from "../services/boardService.js";
 
 async function create(req, res) {
@@ -138,4 +139,81 @@ async function getOne(req, res) {
   }
 }
 
-export { create, getAll, getOne };
+async function update(req, res) {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      logger.debug("update(boardController): Unauthorized access attempt");
+
+      return res.status(401).json({ message: `Unauthorized access attempt` });
+    }
+
+    const dbClient = req.dbClient;
+    const existingUser = await getUserById(user.id, dbClient);
+
+    if (!existingUser) {
+      logger.debug(
+        `update(boardController): User with id(${user.id}) does not exist`
+      );
+
+      return res.status(404).json({ message: "User does not exist" });
+    }
+
+    if (
+      user.id !== existingUser.id &&
+      user.email == existingUser.email &&
+      user.role == existingUser.role
+    ) {
+      logger.debug(
+        `update(boardController): User data mismatch - token user(${user.id}, ${user.email}, ${user.role}) and db user(${existingUser.id}, ${existingUser.email}, ${existingUser.role})`
+      );
+
+      return res.status(403).json({ message: "User data mismatch" });
+    }
+
+    const userId = user.id;
+    const subDomain = req.subDomain;
+
+    if (!subDomain) {
+      logger.debug(`update(boardController): No subDomain found in request`);
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
+    const boardId = req.params.id;
+
+    if (!boardId) {
+      logger.debug(`update(boardController): No boardId found in request`);
+
+      return res.status(400).json({ message: "Board ID is required" });
+    }
+
+    const boardUpdateData = req.body;
+
+    if (boardUpdateData.length == 0) {
+      logger.debug(`update(boardController): Missing required fields`);
+
+      return res.status(400).json({ message: `Missing required fields` });
+    }
+    const result = await updateBoard(
+      subDomain,
+      boardUpdateData,
+      boardId,
+      userId,
+      dbClient
+    );
+
+    return res.status(result.status).json({ message: result.message });
+  } catch (err) {
+    logger.error(`update(boardController): ${err.message}`);
+
+    if (err.status == 500) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    return res.status(err.status).json({ message: err.message });
+  }
+}
+
+export { create, getAll, getOne, update };
