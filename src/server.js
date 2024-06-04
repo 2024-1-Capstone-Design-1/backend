@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 
 import logger from "./utils/logger.js";
 import specs from "./swagger/swagger.js";
@@ -15,6 +16,7 @@ const port = 3000;
 
 app.use(morgan("dev"));
 
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

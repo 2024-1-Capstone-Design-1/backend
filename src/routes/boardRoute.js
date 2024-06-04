@@ -10,6 +10,7 @@ import {
   getAll,
   getOne,
   update,
+  softDelete,
 } from "../controllers/boardController.js";
 
 const boardRouter = Router();
@@ -396,6 +397,87 @@ boardRouter.patch(
   authenticateToken,
   attachDbClient,
   update,
+  releaseDbClient
+);
+
+/**
+ * @swagger
+ * /blog/{subDomain}/board/soft-delete/{id}:
+ *   patch:
+ *     summary: Soft delete a specific board by ID
+ *     description: Soft delete a specific board by its ID and the blog's subDomain.
+ *     tags:
+ *       - Boards
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the board to soft delete
+ *     responses:
+ *       200:
+ *         description: Board soft deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Board soft deleted successfully
+ *       400:
+ *         description: SubDomain or Board ID is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain or Board ID is required
+ *       403:
+ *         description: Unauthorized delete attempt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized delete attempt
+ *       404:
+ *         description: Blog or Board not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog or Board not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
+boardRouter.patch(
+  "/soft-delete/:id",
+  authenticateToken,
+  attachDbClient,
+  softDelete,
   releaseDbClient
 );
 
