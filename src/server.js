@@ -12,11 +12,11 @@ import blogRouter from "./routes/blogRoute.js";
 import templateRouter from "./routes/templateRoute.js";
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(morgan("dev"));
 
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

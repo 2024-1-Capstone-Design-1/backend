@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { signup, login } from "../controllers/authController.js";
+import { signup, login, refreshToken } from "../controllers/authController.js";
 import {
   attachDbClient,
   releaseDbClient,
@@ -170,5 +170,53 @@ authRouter.post("/signup", attachDbClient, signup, releaseDbClient);
  *                   example: Internal Server Error
  */
 authRouter.post("/login", attachDbClient, login, releaseDbClient);
+
+/**
+ * @swagger
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh the access token
+ *     description: Use the refresh token to get a new access token.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: New access token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: New access token generated
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: "newAccessTokenHere"
+ *       401:
+ *         description: Refresh token is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Refresh token is required
+ *       403:
+ *         description: Invalid refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid refresh token
+ */
+authRouter.post("/refresh-token", refreshToken);
 
 export default authRouter;
