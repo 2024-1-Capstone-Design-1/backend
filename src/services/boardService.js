@@ -169,6 +169,7 @@ async function getOneBoard(subDomain, boardId, dbClient) {
       logger.debug(
         `getOneBoard(boardService): Board not found for id(${boardId})`
       );
+
       throw new AppError(404, "Board not found");
     }
 
