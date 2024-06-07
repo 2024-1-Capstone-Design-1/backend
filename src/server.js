@@ -8,6 +8,7 @@ import logger from "./utils/logger.js";
 import specs from "./swagger/swagger.js";
 import { initDatabase } from "./configs/db.js";
 import authRouter from "./routes/authRoute.js";
+import userRouter from "./routes/userRoute.js";
 import blogRouter from "./routes/blogRoute.js";
 import templateRouter from "./routes/templateRoute.js";
 
@@ -23,6 +24,7 @@ app.use(bodyParser.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
 app.use("/blog", blogRouter);
 app.use("/template", templateRouter);
 
