@@ -283,4 +283,70 @@ async function softDelete(req, res) {
   }
 }
 
-export { create, getAll, getOne, update, softDelete };
+async function hardDelete(req, res) {
+  try {
+    const user = req.user;
+    console.log(user);
+    if (!user) {
+      logger.debug("softDelete(boardController): Unauthorized access attempt");
+
+      return res.status(401).json({ message: `Unauthorized access attempt` });
+    }
+
+    const dbClient = req.dbClient;
+    const existingUser = await getUserById(user.id, dbClient);
+
+    if (!existingUser) {
+      logger.debug(
+        `softDelete(boardController): User with id(${user.id}) does not exist`
+      );
+
+      return res.status(404).json({ message: "User does not exist" });
+    }
+
+    if (
+      user.id !== existingUser.id &&
+      user.email == existingUser.email &&
+      user.role == existingUser.role
+    ) {
+      logger.debug(
+        `softDelete(boardController): User data mismatch - token user(${user.id}, ${user.email}, ${user.role}) and db user(${existingUser.id}, ${existingUser.email}, ${existingUser.role})`
+      );
+
+      return res.status(403).json({ message: "User data mismatch" });
+    }
+
+    const userId = user.id;
+    const subDomain = req.subDomain;
+
+    if (!subDomain) {
+      logger.debug(
+        `softDelete(boardController): No subDomain found in request`
+      );
+
+      return res.status(400).json({ message: "SubDomain is required" });
+    }
+
+    const boardId = req.params.id;
+
+    if (!boardId) {
+      logger.debug(`softDelete(boardController): No boardId found in request`);
+
+      return res.status(400).json({ message: "BoardId is required" });
+    }
+
+    const result = await softDelete(subDomain, boardId, userId, dbClient);
+
+    return res.status(result.status).json({ message: result.message });
+  } catch (err) {
+    logger.error(`softDelete(boardController): ${err.message}`);
+
+    if (err.status == 500) {
+      return res.status(err.status).json({ message: err.message });
+    }
+
+    return res.status(err.status).json({ message: err.message });
+  }
+}
+
+export { create, getAll, getOne, update, softDelete, hardDelete };

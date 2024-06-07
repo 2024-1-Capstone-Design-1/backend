@@ -1,5 +1,9 @@
 import logger from "../utils/logger.js";
-import { createUser, loginService } from "../services/authService.js";
+import {
+  createUser,
+  loginService,
+  refreshTokenService,
+} from "../services/authService.js";
 
 async function signup(req, res) {
   try {
@@ -57,9 +61,17 @@ async function login(req, res) {
 
     const result = await loginService(loginData, dbClient);
 
-    return res
-      .status(result.status)
-      .json({ message: result.message, data: result.data });
+    res.cookie("refreshToken", result.data.refreshToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 60 * 24 * 14,
+    });
+
+    return res.status(result.status).json({
+      message: result.message,
+      data: { accessToken: result.data.accessToken },
+    });
   } catch (err) {
     logger.error(`login(authController): ${err.message}`);
 
@@ -71,4 +83,24 @@ async function login(req, res) {
   }
 }
 
-export { signup, login };
+async function refreshToken(req, res) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      logger.debug(
+        `refreshToken(authController): No refresh token found in request`
+      );
+      return res.status(401).json({ message: "Refresh token is required" });
+    }
+
+    const result = await refreshTokenService(refreshToken);
+
+    return res.status(200).json({ message: result.message, data: result.data });
+  } catch (err) {
+    logger.error(`refreshToken(authController): ${err.message}`);
+    return res.status(403).json({ message: "Invalid refresh token" });
+  }
+}
+
+export { signup, login, refreshToken };

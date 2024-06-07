@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
 
 import logger from "../utils/logger.js";
 import AppError from "../utils/appError.js";
@@ -106,4 +107,29 @@ async function loginService(loginData, dbClient) {
   }
 }
 
-export { createUser, loginService };
+async function refreshTokenService(refreshToken) {
+  try {
+    const user = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const accessToken = generateAccessToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    logger.debug(
+      `refreshToken(authService): Refresh token verified, new access token generated`
+    );
+
+    return new AppResponse(200, "New access token generated", { accessToken });
+  } catch (err) {
+    logger.error(`refreshToken(authService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export { createUser, loginService, refreshTokenService };

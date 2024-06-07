@@ -11,6 +11,7 @@ import {
   getOne,
   update,
   softDelete,
+  hardDelete,
 } from "../controllers/boardController.js";
 
 const boardRouter = Router();
@@ -478,6 +479,14 @@ boardRouter.patch(
   authenticateToken,
   attachDbClient,
   softDelete,
+  releaseDbClient
+);
+
+boardRouter.delete(
+  "/hard-delete/:id",
+  authenticateToken,
+  attachDbClient,
+  hardDelete,
   releaseDbClient
 );
 
