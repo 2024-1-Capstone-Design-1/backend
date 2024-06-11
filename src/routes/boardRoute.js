@@ -21,35 +21,36 @@ const boardRouter = Router();
  * /blog/{subDomain}/board/create:
  *   post:
  *     summary: Create a new board
- *     description: Create a new board for the authenticated user.
+ *     description: Create a new board in the specified blog's subdomain.
  *     tags:
  *       - Boards
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - title
- *               - detail
  *             properties:
  *               title:
  *                 type: string
- *                 description: Board title
- *                 example: "My Board"
+ *                 description: The title of the board
+ *                 example: "New Board Title"
  *               detail:
  *                 type: string
- *                 description: Detailed description of the board
- *                 example: "This is a detailed description of the board."
+ *                 description: The detail of the board
+ *                 example: "Detailed description of the board"
  *               image_url:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: Array of image URLs
- *                 example: ["http://example.com/image1.jpg", "http://example.com/image2.jpg"]
+ *                   example: "http://example.com/image.jpg"
  *     responses:
  *       201:
  *         description: Board created successfully
@@ -62,7 +63,7 @@ const boardRouter = Router();
  *                   type: string
  *                   example: Board created successfully
  *       400:
- *         description: Missing required fields or invalid input
+ *         description: Missing required fields or SubDomain is required
  *         content:
  *           application/json:
  *             schema:
@@ -70,17 +71,7 @@ const boardRouter = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Missing required fields or invalid input
- *       401:
- *         description: Unauthorized access attempt
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Unauthorized access attempt
+ *                   example: Missing required fields
  *       403:
  *         description: User data mismatch
  *         content:
@@ -482,6 +473,79 @@ boardRouter.patch(
   releaseDbClient
 );
 
+/**
+ * @swagger
+ * /blog/{subDomain}/board/hard-delete/{id}:
+ *   delete:
+ *     summary: Hard delete a specific board by ID
+ *     description: Hard delete a specific board by its ID and the blog's subDomain. The board must be previously soft deleted.
+ *     tags:
+ *       - Boards
+ *     parameters:
+ *       - in: path
+ *         name: subDomain
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The subdomain of the blog
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the board to hard delete
+ *     responses:
+ *       200:
+ *         description: Board hard deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Board hard deleted successfully
+ *       400:
+ *         description: SubDomain or Board ID is required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: SubDomain or Board ID is required
+ *       403:
+ *         description: Unauthorized delete attempt
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized delete attempt
+ *       404:
+ *         description: Blog or Board not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Blog or Board not found
+ *       500:
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error
+ */
 boardRouter.delete(
   "/hard-delete/:id",
   authenticateToken,
