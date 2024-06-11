@@ -2,7 +2,7 @@ import logger from "../utils/logger.js";
 import AppResponse from "../utils/appResponse.js";
 import AppError from "../utils/appError.js";
 
-async function createBoard(boardData, user, dbClient) {
+async function createBoard(boardData, user, subDomain, dbClient) {
   try {
     const { title, detail, image_url } = boardData;
 
@@ -16,8 +16,8 @@ async function createBoard(boardData, user, dbClient) {
     const userId = user.id;
 
     const existingBlog = await dbClient.query(
-      `SELECT id FROM blogs WHERE id = $1 and user_id = $2`,
-      [userId]
+      `SELECT id FROM blogs WHERE subdomain = $1 and user_id = $2`,
+      [subDomain, userId]
     );
 
     if (existingBlog.rows.length < 1) {
@@ -309,11 +309,11 @@ async function softDeleteBoard(subDomain, boardId, userId, dbClient) {
     const blogId = existingSubDomain.rows[0].id;
 
     const existingBoard = await dbClient.query(
-      `SELECT id FROM boards WHERE id = $1 AND blog_id = $2`,
+      `SELECT id, deleted FROM boards WHERE id = $1 AND blog_id = $2`,
       [boardId, blogId]
     );
 
-    if (existingBoard.rows.length === 0) {
+    if (existingBoard.rows.length === 0 || existingBoard.rows[0].deleted) {
       logger.debug(
         `softDeleteBoard(boardService): Board(${boardId}) does not exist for blog(${subDomain})`
       );
@@ -341,4 +341,67 @@ async function softDeleteBoard(subDomain, boardId, userId, dbClient) {
   }
 }
 
-export { createBoard, getAllBoards, getOneBoard, updateBoard, softDeleteBoard };
+async function hardDeleteBoard(subDomain, boardId, userId, dbClient) {
+  try {
+    const existingSubDomain = await dbClient.query(
+      `SELECT id, user_id FROM blogs WHERE subdomain = $1`,
+      [subDomain]
+    );
+
+    if (existingSubDomain.rows.length == 0) {
+      logger.debug(`hardDeleteBoard(boardService): SubDomain does not exists`);
+
+      throw new AppError(404, `SubDomain does not exists`);
+    }
+
+    if (userId !== existingSubDomain.rows[0].user_id) {
+      logger.debug(
+        `hardDeleteBoard(boardService): Unauthorized update attempt by user(${userId}) for blog(${subDomain})`
+      );
+
+      throw new AppError(403, `Unauthorized`);
+    }
+
+    const blogId = existingSubDomain.rows[0].id;
+
+    const existingBoard = await dbClient.query(
+      `SELECT id FROM boards WHERE id = $1 AND blog_id = $2`,
+      [boardId, blogId]
+    );
+
+    if (existingBoard.rows.length === 0) {
+      logger.debug(
+        `hardDeleteBoard(boardService): Board(${boardId}) does not exist for blog(${subDomain})`
+      );
+      throw new AppError(404, `Board not found`);
+    }
+
+    await dbClient.query(
+      `DELETE FROM boards WHERE deleted = true AND id = $1 AND blog_id = $2`,
+      [boardId, blogId]
+    );
+
+    logger.debug(
+      `hardDeleteBoard(boardService): Board with id(${boardId}) soft deleted successfully`
+    );
+
+    return new AppResponse(200, `Board soft deleted successfully`);
+  } catch (err) {
+    logger.error(`hardDeleteBoard(boardService): ${err.message}`);
+
+    if (err.status !== 500) {
+      throw err;
+    }
+
+    throw new AppError(500, `Internal Server Error`);
+  }
+}
+
+export {
+  createBoard,
+  getAllBoards,
+  getOneBoard,
+  updateBoard,
+  softDeleteBoard,
+  hardDeleteBoard,
+};

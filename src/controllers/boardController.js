@@ -5,6 +5,7 @@ import {
   getAllBoards,
   getOneBoard,
   softDeleteBoard,
+  hardDeleteBoard,
   updateBoard,
 } from "../services/boardService.js";
 
@@ -41,7 +42,7 @@ async function create(req, res) {
       return res.status(403).json({ message: "User data mismatch" });
     }
 
-    const { subDomain } = req.params;
+    const subDomain = req.subDomain;
 
     if (!subDomain) {
       logger.debug(`create(boardController): No subDomain found in request`);
@@ -65,7 +66,7 @@ async function create(req, res) {
       return res.status(400).json({ message: `Missing required fields` });
     }
 
-    const result = await createBoard(boardData, user, dbClient);
+    const result = await createBoard(boardData, user, subDomain, dbClient);
 
     return res.status(result.status).json({ message: result.message });
   } catch (err) {
@@ -220,7 +221,7 @@ async function update(req, res) {
 async function softDelete(req, res) {
   try {
     const user = req.user;
-    console.log(user);
+
     if (!user) {
       logger.debug("softDelete(boardController): Unauthorized access attempt");
 
@@ -269,7 +270,7 @@ async function softDelete(req, res) {
       return res.status(400).json({ message: "BoardId is required" });
     }
 
-    const result = await softDelete(subDomain, boardId, userId, dbClient);
+    const result = await softDeleteBoard(subDomain, boardId, userId, dbClient);
 
     return res.status(result.status).json({ message: result.message });
   } catch (err) {
@@ -286,9 +287,9 @@ async function softDelete(req, res) {
 async function hardDelete(req, res) {
   try {
     const user = req.user;
-    console.log(user);
+
     if (!user) {
-      logger.debug("softDelete(boardController): Unauthorized access attempt");
+      logger.debug("hardDelete(boardController): Unauthorized access attempt");
 
       return res.status(401).json({ message: `Unauthorized access attempt` });
     }
@@ -298,7 +299,7 @@ async function hardDelete(req, res) {
 
     if (!existingUser) {
       logger.debug(
-        `softDelete(boardController): User with id(${user.id}) does not exist`
+        `hardDelete(boardController): User with id(${user.id}) does not exist`
       );
 
       return res.status(404).json({ message: "User does not exist" });
@@ -310,7 +311,7 @@ async function hardDelete(req, res) {
       user.role == existingUser.role
     ) {
       logger.debug(
-        `softDelete(boardController): User data mismatch - token user(${user.id}, ${user.email}, ${user.role}) and db user(${existingUser.id}, ${existingUser.email}, ${existingUser.role})`
+        `hardDelete(boardController): User data mismatch - token user(${user.id}, ${user.email}, ${user.role}) and db user(${existingUser.id}, ${existingUser.email}, ${existingUser.role})`
       );
 
       return res.status(403).json({ message: "User data mismatch" });
@@ -321,7 +322,7 @@ async function hardDelete(req, res) {
 
     if (!subDomain) {
       logger.debug(
-        `softDelete(boardController): No subDomain found in request`
+        `hardDelete(boardController): No subDomain found in request`
       );
 
       return res.status(400).json({ message: "SubDomain is required" });
@@ -330,16 +331,16 @@ async function hardDelete(req, res) {
     const boardId = req.params.id;
 
     if (!boardId) {
-      logger.debug(`softDelete(boardController): No boardId found in request`);
+      logger.debug(`hardDelete(boardController): No boardId found in request`);
 
       return res.status(400).json({ message: "BoardId is required" });
     }
 
-    const result = await softDelete(subDomain, boardId, userId, dbClient);
+    const result = await hardDeleteBoard(subDomain, boardId, userId, dbClient);
 
     return res.status(result.status).json({ message: result.message });
   } catch (err) {
-    logger.error(`softDelete(boardController): ${err.message}`);
+    logger.error(`hardDelete(boardController): ${err.message}`);
 
     if (err.status == 500) {
       return res.status(err.status).json({ message: err.message });

@@ -87,7 +87,7 @@ authRouter.post("/signup", attachDbClient, signup, releaseDbClient);
  * /auth/login:
  *   post:
  *     summary: User login
- *     description: Authenticate a user and return tokens.
+ *     description: Authenticate a user and return access and refresh tokens.
  *     tags:
  *       - Authentication
  *     requestBody:
@@ -96,18 +96,15 @@ authRouter.post("/signup", attachDbClient, signup, releaseDbClient);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - email
- *               - password
  *             properties:
  *               email:
  *                 type: string
- *                 description: User's email
- *                 example: user123@example.com
+ *                 description: User's email address
+ *                 example: "user123@example.com"
  *               password:
  *                 type: string
  *                 description: User's password
- *                 example: password123
+ *                 example: "password123"
  *     responses:
  *       200:
  *         description: Login successful
@@ -124,10 +121,7 @@ authRouter.post("/signup", attachDbClient, signup, releaseDbClient);
  *                   properties:
  *                     accessToken:
  *                       type: string
- *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
- *                     refreshToken:
- *                       type: string
- *                       example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *       400:
  *         description: Missing required fields
  *         content:
