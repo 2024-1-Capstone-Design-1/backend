@@ -152,6 +152,7 @@ async function updateBlog(subDomain, blogUpdateData, userId, dbClient) {
         blogId,
       ]);
     }
+
     if (!name && template_id) {
       const existingTemplate = await dbClient.query(
         `SELECT id FROM templates WHERE id = $1`,
