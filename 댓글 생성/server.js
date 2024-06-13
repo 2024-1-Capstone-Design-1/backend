@@ -11,6 +11,7 @@ import authRouter from "./routes/authRoute.js";
 import userRouter from "./routes/userRoute.js";
 import blogRouter from "./routes/blogRoute.js";
 import templateRouter from "./routes/templateRoute.js";
+import commentRouter from "./routes/commentRoute.js"; // 댓글 라우터 추가
 
 const app = express();
 const port = 3001;
@@ -19,6 +20,7 @@ app.use(morgan("dev"));
 
 app.use(cors({ origin: "*", credentials: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(bodyParser.json());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
@@ -27,6 +29,7 @@ app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/blog", blogRouter);
 app.use("/template", templateRouter);
+app.use("/comments", commentRouter); // 댓글 라우터 사용
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
