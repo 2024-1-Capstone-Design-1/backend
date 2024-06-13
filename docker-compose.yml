@@ -5,16 +5,15 @@ services:
     build: .
     ports:
       - "3001:3001"
-    volumes:
-      - type: bind
-        source: ./
-        target: /app
     environment:
       - DB_USER=${DB_USER}
       - DB_HOST=${D_DB_HOST}
       - DB_NAME=${DB_NAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
     depends_on:
       - postgres
 
@@ -30,17 +29,17 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
-nginx:
-  container_name: nginx
-  image: nginx:latest
-  ports:
-    - "80:80"
-  volumes:
-    - type: bind
-      source: ./nginx.conf
-      target: /etc/nginx/nginx.conf
-  depends_on:
-    - app
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/nginx.conf
+    depends_on:
+      - app
 
 volumes:
   db:
