@@ -30,5 +30,17 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
+nginx:
+  container_name: nginx
+  image: nginx:latest
+  ports:
+    - "80:80"
+  volumes:
+    - type: bind
+      source: ./nginx.conf
+      target: /etc/nginx/nginx.conf
+  depends_on:
+    - app
+
 volumes:
   db:
