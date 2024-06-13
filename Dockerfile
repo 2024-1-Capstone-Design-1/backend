@@ -8,6 +8,10 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 3001
 
-CMD ["npm", "run", "dev"]
+COPY wait-for-it.sh /usr/local/bin/wait-for-it.sh
+
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
+CMD ["/bin/sh", "/usr/local/bin/wait-for-it.sh", "postgres", "5432", "--", "node", "src/server.js"]
