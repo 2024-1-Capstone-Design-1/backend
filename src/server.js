@@ -17,7 +17,16 @@ const port = 3001;
 
 app.use(morgan("dev"));
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    maxAge: 86400,
+  })
+);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
