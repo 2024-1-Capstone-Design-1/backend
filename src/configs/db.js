@@ -7,6 +7,7 @@ import createBoardTable from "../models/board.js";
 import createTemplateTable from "../models/template.js";
 import alterTablesToAddForeignKeys from "../models/alterTable.js";
 import createBlogTable from "../models/blog.js";
+import createCommentTable from "../models/Comment.js"; // 댓글 테이블 생성 함수 임포트
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ async function initDatabase() {
     await createBoardTable(client);
     await createTemplateTable(client);
     await alterTablesToAddForeignKeys(client);
+    await createCommentTable(client); // 댓글 테이블 생성
 
     await client.query("COMMIT");
 
